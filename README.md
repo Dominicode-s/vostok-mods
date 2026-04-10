@@ -1,4 +1,4 @@
-# 🎮 Vostok Mods
+# Vostok Mods
 
 A collection of mods for **[Road to Vostok](https://store.steampowered.com/app/1963610/Road_to_Vostok/)** - a hardcore survival FPS set on the Finnish-Russian border.
 
