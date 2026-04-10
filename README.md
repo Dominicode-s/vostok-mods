@@ -1,6 +1,6 @@
 # 🎮 Vostok Mods
 
-A collection of mods for **[Road to Vostok](https://store.steampowered.com/app/1963610/Road_to_Vostok/)** — a hardcore survival FPS set on the Finnish-Russian border.
+A collection of mods for **[Road to Vostok](https://store.steampowered.com/app/1963610/Road_to_Vostok/)** - a hardcore survival FPS set on the Finnish-Russian border.
 
 All mods use the [Metro / Community Mod Loader](https://modworkshop.net/mod/55914) and are compatible with each other.
 
@@ -16,7 +16,7 @@ One-click inventory sorting, smart item transfer, take-all / store-all, and conf
 - MCM hotkey support (keyboard + mouse buttons)
 
 ### 💰 [Cash System](https://github.com/Dominicode-s/vostok-cash)
-Adds a physical cash economy to the game — lootable cash bundles, wallet UI, and buy/sell mechanics with traders.
+Adds a physical cash economy to the game - lootable cash bundles, wallet UI, and buy/sell mechanics with traders.
 - Physical cash items that spawn in containers and on enemies
 - Wallet UI integrated into the trader interface
 - Buy and sell items for cash
@@ -33,7 +33,7 @@ An RPG-style progression system with 11 upgradeable skills.
 
 ## 📖 Modding Guide
 
-New to modding Road to Vostok? Check out the **[Modding Guide](MODDING_GUIDE.md)** — a comprehensive reference covering mod structure, override chaining, UI injection, MCM integration, hotkeys, debugging, and more.
+New to modding Road to Vostok? Check out the **[Modding Guide](MODDING_GUIDE.md)** - a comprehensive reference covering mod structure, override chaining, UI injection, MCM integration, hotkeys, debugging, and more.
 
 ---
 
@@ -47,12 +47,12 @@ New to modding Road to Vostok? Check out the **[Modding Guide](MODDING_GUIDE.md)
 ## Compatibility
 
 All mods are designed to work together and with other mods:
-- **Quick Stack & Sort** — Pure autoload, no script overrides
-- **Cash System** — Minimal overrides (Interface.gd only), uses signals API
-- **XP & Skills** — Override-based, calls `super()` for proper chaining
+- **Quick Stack & Sort** - Pure autoload, no script overrides
+- **Cash System** - Minimal overrides (Interface.gd only), uses signals API
+- **XP & Skills** - Override-based, calls `super()` for proper chaining
 
 ## Links
 
-- [ModWorkshop — Quick Stack & Sort](https://modworkshop.net/mod/55986)
-- [ModWorkshop — Cash System](https://modworkshop.net/mod/55951)
-- [ModWorkshop — XP & Skills](https://modworkshop.net/mod/55940)
+- [ModWorkshop - Quick Stack & Sort](https://modworkshop.net/mod/55986)
+- [ModWorkshop - Cash System](https://modworkshop.net/mod/55951)
+- [ModWorkshop - XP & Skills](https://modworkshop.net/mod/55940)
