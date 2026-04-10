@@ -8,21 +8,21 @@ All mods use the [Metro / Community Mod Loader](https://modworkshop.net/mod/5591
 
 ## Mods
 
-### ⚡ [Quick Stack & Sort](https://github.com/Dominicode-s/vostok-quick-stack)
+### [Quick Stack & Sort](https://github.com/Dominicode-s/vostok-quick-stack)
 One-click inventory sorting, smart item transfer, take-all / store-all, and configurable hotkey support.
 - Sort any grid (inventory or container) with auto-stacking
 - Transfer matching items between inventory and container
 - Take All / Store All buttons
 - MCM hotkey support (keyboard + mouse buttons)
 
-### 💰 [Cash System](https://github.com/Dominicode-s/vostok-cash)
+### [Cash System](https://github.com/Dominicode-s/vostok-cash)
 Adds a physical cash economy to the game - lootable cash bundles, wallet UI, and buy/sell mechanics with traders.
 - Physical cash items that spawn in containers and on enemies
 - Wallet UI integrated into the trader interface
 - Buy and sell items for cash
 - Custom 3D cash bundle model and textures
 
-### 📈 [XP & Skills System](https://github.com/Dominicode-s/vostok-skills)
+### [XP & Skills System](https://github.com/Dominicode-s/vostok-skills)
 An RPG-style progression system with 11 upgradeable skills.
 - Earn XP from looting, killing, trading, and completing tasks
 - 11 skills: Vitality, Endurance, Pack Mule, Hunger/Thirst/Cold Resist, and more
@@ -31,7 +31,7 @@ An RPG-style progression system with 11 upgradeable skills.
 
 ---
 
-## 📖 Modding Guide
+## Modding Guide
 
 New to modding Road to Vostok? Check out the **[Modding Guide](MODDING_GUIDE.md)** - a comprehensive reference covering mod structure, override chaining, UI injection, MCM integration, hotkeys, debugging, and more.
 
