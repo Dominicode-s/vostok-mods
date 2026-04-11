@@ -29,6 +29,14 @@ An RPG-style progression system with 11 upgradeable skills.
 - Skill UI tab integrated into the inventory screen
 - Fully configurable via MCM
 
+### [Run Summary](https://github.com/Dominicode-s/vostok-run-summary)
+After-action report for every raid — shows a detailed breakdown when you die or return to the shelter.
+- Combat, loot, survival, economy, XP, and time stats
+- Tracks survival drain and restoration separately (eating/drinking shows up)
+- Browse your last 10 runs in the history tab
+- F6 hotkey to reopen the last summary anytime
+- Optional integration with Cash System and XP & Skills mods
+
 ---
 
 ## Modding Guide
@@ -50,9 +58,11 @@ All mods are designed to work together and with other mods:
 - **Quick Stack & Sort** - Pure autoload, no script overrides
 - **Cash System** - Minimal overrides (Interface.gd only), uses signals API
 - **XP & Skills** - Override-based, calls `super()` for proper chaining
+- **Run Summary** - Pure autoload, no script overrides
 
 ## Links
 
 - [ModWorkshop - Quick Stack & Sort](https://modworkshop.net/mod/55986)
 - [ModWorkshop - Cash System](https://modworkshop.net/mod/55951)
 - [ModWorkshop - XP & Skills](https://modworkshop.net/mod/55940)
+- [GitHub - Run Summary](https://github.com/Dominicode-s/vostok-run-summary)
