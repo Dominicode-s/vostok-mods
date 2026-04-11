@@ -326,8 +326,8 @@ Map (root scene)
 ├── World (Node3D)
 │   └── Environment, Planet, VFX, Audio
 ├── Core (Node3D)
-│   ├── UI (Control)              ← Interface lives here
-│   │   └── Interface
+│   ├── UI (Control)              ← UIManager script lives here
+│   │   └── Interface             ← Separate node! UIManager.interface = $Interface
 │   │       ├── Inventory (Control)   ← offset_left=1216, offset_top=128
 │   │       │   ├── Header (ColorRect) ← 320px wide, 32px tall, y=-32
 │   │       │   └── Grid (TextureRect)
@@ -343,6 +343,20 @@ Map (root scene)
 │   └── Controller (CharacterBody3D)
 └── Killbox (Area3D)
 ```
+
+### UIManager vs Interface — Critical Distinction
+
+**UIManager** (`/root/Map/Core/UI`) and **Interface** (`UIManager.interface`) are **separate nodes** with different responsibilities:
+
+| Node | Script | Key Properties | Key Methods |
+|------|--------|---------------|-------------|
+| **UIManager** | `UIManager.gd` | `interface`, `HUD`, `settings` | `OpenContainer()`, `ClickAudio()` |
+| **Interface** | `Interface.gd` | `containerGrid`, `inventoryGrid`, `container` | `Create()`, `AutoStack()`, `AutoPlace()`, `Open()` |
+
+- `UIManager.OpenContainer(container)` sets `interface.container` then calls `interface.Open()`
+- `containerGrid`, `inventoryGrid`, and all item manipulation methods live on **Interface**, not UIManager
+- If you find a UIManager reference, access Interface via `ui_manager.interface`
+- `UIManager.ClickAudio()` plays UI click sound but may not work from mod context — create your own `AudioStreamPlayer` instead
 
 ### Key Interface Properties
 
@@ -618,11 +632,20 @@ _mcm_helpers.RegisterConfiguration(
 func _on_mcm_save(config: ConfigFile):
     _apply_config(config)
 
+# Safe helper — MCM config keys can be null if corrupted or outdated
+func _mcm_val(config: ConfigFile, section: String, key: String, fallback):
+    var entry = config.get_value(section, key, null)
+    if entry == null or not entry is Dictionary:
+        return fallback
+    return entry.get("value", fallback)
+
 func _apply_config(config: ConfigFile):
-    my_setting = config.get_value("Int", "my_int")["value"]
-    my_key = config.get_value("Keycode", "my_key")["value"]
-    my_choice = config.get_value("Dropdown", "my_choice")["value"]  # Returns index
+    my_setting = _mcm_val(config, "Int", "my_int", my_setting)
+    my_key = _mcm_val(config, "Keycode", "my_key", my_key)
+    my_choice = _mcm_val(config, "Dropdown", "my_choice", 0)  # Returns index
 ```
+
+**⚠️ Never use `config.get_value(...)["value"]` directly** — if the key is missing or the config is corrupted, this crashes. Always use a safe helper like `_mcm_val()` above that falls back to the current value.
 
 **Note**: Use `make_dir_recursive()` not `make_dir()` — the MCM parent folder may not exist yet.
 
@@ -754,6 +777,44 @@ MCM's `Keycode` config type only captures `InputEventKey` (keyboard). For mouse 
 
 ### 12. `hoverGrid` vs `GetHoverGrid()`
 `Interface.hoverGrid` is only set when hovering directly over an item. `Interface.GetHoverGrid()` checks mouse position against all visible grid rects — use this for hotkey-based grid detection.
+
+### 13. `super()` in Character._ready() breaks skills
+The base `Character._ready()` reinitializes survival stat values. If your override calls `super()` in `_ready()`, it will reset any stat modifications your mod applied. **Do NOT call `super()` in Character._ready()** — it's the one exception to the "always call super" rule. `super()` IS safe in: `Death()`, `Health()`, `Stamina()`, and other per-frame methods.
+
+### 14. `get_script().resource_path` resolves to base game path
+In override scripts, `get_script().resource_path` returns `res://Scripts/Foo.gd` (the base game path), NOT your mod's path. **Do not use it to locate mod resources.** Instead, hardcode the path: `"res://mods/YourMod/sounds/click.mp3"` — VMZ files are mounted at `res://mods/<ModName>/`.
+
+### 15. Container grid timing — `call_deferred` is too early
+When hooking into `LootContainer.Interact()`, the `containerGrid` on Interface is not yet populated when your override runs. `call_deferred()` is still too early. Use `get_tree().create_timer(0.1).timeout.connect(your_callback)` to give `OpenContainer()` time to set up the grid.
+
+### 16. Loading custom audio (MP3) in mods
+You cannot use `load()` or `preload()` for MP3 files in VMZ mods. Load them at runtime:
+
+```gdscript
+var file = FileAccess.open("res://mods/YourMod/sounds/click.mp3", FileAccess.READ)
+if file:
+    var stream = AudioStreamMP3.new()
+    stream.data = file.get_buffer(file.get_length())
+    var player = AudioStreamPlayer.new()
+    player.stream = stream
+    get_tree().root.add_child(player)
+    player.play()
+    player.finished.connect(player.queue_free)
+```
+
+Add the `AudioStreamPlayer` to `get_tree().root`, not to UIManager — UIManager's audio may not work reliably from mod context.
+
+### 17. Game loot bucket system
+`LootContainer` has three arrays: `commonBucket`, `rareBucket`, `legendaryBucket` (filled in `_ready()` via `FillBuckets()`). To spawn a loot item at runtime:
+
+```gdscript
+var item_data = container.commonBucket.pick_random()
+var slot = SlotData.new()
+slot.itemData = item_data
+slot.amount = randi_range(1, item_data.capacity) if item_data.capacity > 1 else 1
+slot.condition = randf_range(0.3, 1.0)
+interface.Create(slot, interface.containerGrid, true)
+```
 
 ## Debugging Tips
 
