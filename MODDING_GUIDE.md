@@ -816,6 +816,85 @@ slot.condition = randf_range(0.3, 1.0)
 interface.Create(slot, interface.containerGrid, true)
 ```
 
+### 18. `gameData.freeze` controls player input
+The game's `Controller._input()` returns early when `gameData.freeze == true`, disabling mouse look and movement. Many other scripts also check it (weapon handling, leaning, NVG, flashlight, etc.). The game's own UI uses this: `UIManager.UIOpen()` sets `freeze = true`, `UIManager.UIClose()` sets `freeze = false`. Use this pattern for custom overlays.
+
+### 19. `ResetCharacter()` clears gameData during death
+`Character.Death()` → `Loader.ResetCharacter()` resets **most gameData fields** (health, energy, hydration, xpTotal, freeze, etc.) to defaults **before** the death scene loads. If you need end-of-run values, track them as accumulators during the run (high-water marks for XP, frame-by-frame drain for survival stats). Reading gameData at run end will give you reset values.
+
+### 20. `inventoryGrid.get_child_count()` includes non-item children
+The inventory/container grids contain both `Item` nodes and layout/internal children. To count actual items, filter children by checking for `slotData`:
+```gdscript
+var count = 0
+for child in _interface.inventoryGrid.get_children():
+    if child.get("slotData") != null:
+        count += 1
+```
+The quick-stack mod uses `child is Item` — both approaches work.
+
+### 21. Controller._ready() recaptures mouse on scene load
+`Controller._ready()` calls `Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)` when the scene loads. If you have a custom overlay, the game will steal the cursor back. Enforce your desired mouse mode in `_process()` while your overlay is visible.
+
+### 22. Modal/overlay input handling
+When building custom UI overlays (modals, panels), the correct architecture to prevent camera movement while keeping buttons clickable:
+
+1. **Use a CanvasLayer** (high layer like 100) so your UI gets GUI events above all game layers
+2. **Set `gameData.freeze = true`** to disable camera look and movement via `Controller._input()`
+3. **In `_input()`**: block `InputEventMouseMotion` and `InputEventKey`, but **do NOT block `InputEventMouseButton`** — let clicks reach your GUI buttons
+4. **In `_unhandled_input()`**: catch leftover mouse clicks so the game doesn't process them
+5. **Enforce state in `_process()`** every frame — game scripts may reset freeze/mouse_mode during scene transitions
+6. **Use `MOUSE_MODE_CONFINED`** (not `MOUSE_MODE_VISIBLE`) — this matches the game's own `UIManager.UIOpen()` pattern
+7. **Always set `gameData.freeze = false` on close** — don't try to restore a previous freeze value, as it may have been captured during a transition when freeze was already true
+
+```gdscript
+func _input(event):
+    if _modal_visible:
+        if event is InputEventKey and event.pressed and not event.echo:
+            if event.keycode == KEY_ESCAPE:
+                _close_modal()
+                get_viewport().set_input_as_handled()
+                return
+        # Block mouse motion + keyboard, let mouse buttons reach GUI
+        if event is InputEventMouseMotion or event is InputEventKey:
+            get_viewport().set_input_as_handled()
+        return
+
+func _unhandled_input(event):
+    if _modal_visible and event is InputEventMouseButton:
+        get_viewport().set_input_as_handled()
+
+func _process(_delta):
+    if _modal_visible:
+        if Input.mouse_mode != Input.MOUSE_MODE_CONFINED:
+            Input.mouse_mode = Input.MOUSE_MODE_CONFINED
+        if "freeze" in gameData and not gameData.freeze:
+            gameData.freeze = true
+```
+
+### 23. XP mod tracks its own xpTotal
+The XP Skills System mod stores `xpTotal` on its own autoload instance (`Engine.get_meta("XPMain")`), separate from `gameData.xpTotal`. To read XP reliably, check the mod instance first:
+```gdscript
+func _get_xp_total() -> int:
+    var xp_mod = Engine.get_meta("XPMain", null)
+    if xp_mod and "xpTotal" in xp_mod:
+        return xp_mod.xpTotal
+    if "xpTotal" in gameData:
+        return gameData.xpTotal
+    return 0
+```
+
+### 24. Survival stat tracking requires frame-by-frame accumulators
+Snapshot-based tracking (start vs end) breaks because: (a) death resets values, and (b) consumption + replenishment cancel out. Track each frame and accumulate decreases separately from increases:
+```gdscript
+var current_hydration = gameData.hydration
+if current_hydration < _acc_last_hydration:
+    _acc_hydration_drain += _acc_last_hydration - current_hydration
+elif current_hydration > _acc_last_hydration:
+    _acc_hydration_restored += current_hydration - _acc_last_hydration
+_acc_last_hydration = current_hydration
+```
+```
+
 ## Debugging Tips
 
 ### Print to game log
