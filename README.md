@@ -23,9 +23,10 @@ Adds a physical cash economy to the game - lootable cash bundles, wallet UI, and
 - Custom 3D cash bundle model and textures
 
 ### [XP & Skills System](https://github.com/Dominicode-s/vostok-skills)
-An RPG-style progression system with 11 upgradeable skills.
+An RPG-style progression system with 13 upgradeable skills and a Prestige tier.
 - Earn XP from looting, killing, trading, and completing tasks
-- 11 skills: Vitality, Endurance, Pack Mule, Hunger/Thirst/Cold Resist, and more
+- 13 skills: Vitality, Endurance, Pack Mule, Hunger/Thirst/Cold Resist, Iron Will, Regeneration, Stealth, Recoil Control, Athleticism, Scavenger, and Composure (reduces camera shake on hits)
+- Prestige system — max every skill to unlock permanent stat bonuses that survive death
 - Skill UI tab integrated into the inventory screen
 - Fully configurable via MCM
 
@@ -36,6 +37,15 @@ After-action report for every raid — shows a detailed breakdown when you die o
 - Browse your last 10 runs in the history tab
 - F6 hotkey to reopen the last summary anytime
 - Optional integration with Cash System and XP & Skills mods
+
+### [Secure Container](https://github.com/Dominicode-s/vostok-secure-containers)
+Equipable pouches with a dedicated slot that protect a handful of items from loot-on-death and let you move them between runs.
+- Three tiers: Field Pouch (2 slots), Secure Pouch (4 slots), Secure Case (6 slots)
+- Custom 3D models and icons per tier
+- Spawns naturally in civilian / industrial / military loot pools
+- Middle-click to open the secure panel; shift-click or drag-and-drop to secure items
+- Contents survive death, scene changes, and main-menu reloads
+- Configurable slot counts, keybind, and loot spawn toggle via MCM
 
 ---
 
@@ -57,12 +67,14 @@ New to modding Road to Vostok? Check out the **[Modding Guide](MODDING_GUIDE.md)
 All mods are designed to work together and with other mods:
 - **Quick Stack & Sort** - Pure autoload, no script overrides
 - **Cash System** - Minimal overrides (Interface.gd only), uses signals API
-- **XP & Skills** - Override-based, calls `super()` for proper chaining
+- **XP & Skills** - Two overrides (Character.gd, Interface.gd), both call `super()` for proper chaining; other behaviour uses polling so it composes cleanly with HellMAI, Injuries System Rework, Aim Punch Modifier, etc.
 - **Run Summary** - Pure autoload, no script overrides
+- **Secure Container** - Runtime Interface.gd override via `take_over_path`, scoped to pouch drop/place handling
 
 ## Links
 
 - [ModWorkshop - Quick Stack & Sort](https://modworkshop.net/mod/55986)
 - [ModWorkshop - Cash System](https://modworkshop.net/mod/55951)
 - [ModWorkshop - XP & Skills](https://modworkshop.net/mod/55940)
-- [GitHub - Run Summary](https://github.com/Dominicode-s/vostok-run-summary)
+- [ModWorkshop - Run Summary](https://modworkshop.net/mod/56019)
+- [ModWorkshop - Secure Container](https://modworkshop.net/mod/56154)
