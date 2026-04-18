@@ -893,7 +893,39 @@ elif current_hydration > _acc_last_hydration:
     _acc_hydration_restored += current_hydration - _acc_last_hydration
 _acc_last_hydration = current_hydration
 ```
+
+### 25. Chain-compat pattern choice: "super first, then modify" vs. pre-super delta scaling vs. full replacement
+
+The community wiki's canonical chain pattern is **"call `super()` first, then modify the result."** It's right — most of the time. But the pattern can't do every shape of modification cleanly. Pick the right one:
+
+**Case A — Your modification TIGHTENS what super produced** (reduces a drain, lowers a cap, adds more damage). Use the canonical pattern:
+
+```gdscript
+func Energy(delta):
+    var before = gameData.energy
+    super(delta)                              # base (+ any upstream mod) drains energy
+    var drained = before - gameData.energy
+    if drained > 0.0:
+        gameData.energy = before - drained * (1.0 - our_bonus)  # keep part of what super drained
 ```
+
+Chain-compat, no state mutation. If another mod upstream contributed to the drain, our scaling tightens their contribution proportionally — usually what you want.
+
+**Case B — The base method supports a scalar on `delta`** (Temperature's cold-drain branch: `gameData.temperature -= delta * x * coldMult` with `coldMult = 1.0` in vanilla). Just scale `delta` before super:
+
+```gdscript
+func Temperature(delta):
+    super(delta * (1.0 - our_bonus))
+```
+
+No state mutation, no post-super math, chain preserved. Works only when base has no xp-based multiplier on the stat already.
+
+**Case C — Your modification LOOSENS a cap that super tightens** (max HP higher than `100 + xpHealth*5`, extra regen above base's ceiling, etc.). The wiki pattern **fails here** — a post-super `clampf` can only lower health further, not raise it back above the value base just clamped it down to. You have two options:
+
+1. **Full replacement** — don't call super. Write your own version of the logic. Lose chain compat for that specific method, accept it if no other mod overrides it.
+2. **Inject-super-restore**: mutate `gameData.xp<Stat>` to a value that makes base produce your desired result, call super, restore. **This is the pattern to avoid** — `gameData` is a preloaded Resource shared by every script that does `preload("res://Resources/GameData.tres")`, and the injection window is a global side channel. `Loader.SaveCharacter()` firing during the window persists the injected value to `Character.tres`. `_sync_to_gamedata` not yet having run means `saved` is 0, and the restore leaves `gameData.xp<Stat> = 0` until the next `_process` tick. We tried this for `Character.Clamp()` in XP Skills v2.5.3 and it reportedly capped max HP at 100 in practice despite the math checking out. Reverted to full replacement in v2.5.5/v2.5.6.
+
+**Rule of thumb:** TIGHTEN → wiki pattern. DELTA-SCALABLE → pre-super scale. LOOSEN → full replacement. Avoid state-injection across super unless you've ruled out the other three.
 
 ## Debugging Tips
 
