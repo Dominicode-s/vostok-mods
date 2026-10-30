@@ -49,12 +49,6 @@ Equipable pouches with a dedicated slot that protect a handful of items from loo
 
 ---
 
-## Modding Guide
-
-New to modding Road to Vostok? Check out the **[Modding Guide](MODDING_GUIDE.md)** - a comprehensive reference covering mod structure, override chaining, UI injection, MCM integration, hotkeys, debugging, and more.
-
----
-
 ## Installation
 
 1. Install the [Metro / Community Mod Loader](https://modworkshop.net/mod/55914)
